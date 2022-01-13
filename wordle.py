@@ -94,13 +94,20 @@ def score_guess(result):
         score += SCORES[color]
     return score
 
+def get_random_word():
+    options = []
+    with open('eligible_words.txt','r') as f:
+        for word in f:
+            options.append(word.strip())
+    return random.choice(options)
+
 class WordleSolver:
     def __init__(self):
         self.clues_array = np.zeros((26,5), dtype=int)
         self.options_array = np.ones((26,5), dtype=int)
         # initialize weights array, this is the intelligent part of the program
         # and will be updated by our ML model
-        self.weights = np.full((26, 5), 0.2)
+        self.weights = np.full((26, 5), 0.5)
         self.guesses_matrix = []
         self.guesses_text = []
         self.results = []
@@ -152,7 +159,7 @@ class WordleSolver:
     def print_results(self):
         total = len(self.guesses_text)
         for guess_num, guess_word, result in zip(range(1, len(self.guesses_text)+1), self.guesses_text, self.results):
-            print('%s/%s %s %s' %(guess_num, total, guess_word, result_to_emojis(result)))
+            print('%s %s %s/%s' %(guess_word, result_to_emojis(result), guess_num, total))
 
     def guess_and_check(self, target):
         guess = self.guess()
@@ -162,8 +169,7 @@ class WordleSolver:
         self.score = score_guess(result)
         return
 
-    def run_sim(self):
-        target = input('Input a five letter word: ')
+    def run_sim(self, target):
         while self.score < 500:
             self.guess_and_check(target)
         self.print_results()
