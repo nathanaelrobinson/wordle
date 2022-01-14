@@ -108,9 +108,16 @@ class WordleSolver:
         self.guesses_matrix = []
         self.guesses_text = []
         self.results = []
-        self.options = np.load('eligible_words.npy')
+        options_list = []
+        with open('eligible_words.txt', 'r') as f:
+            for word in f:
+                options_list.append(word.strip())
         # shuffle our list so it's not alphabetical
-        random.shuffle(self.options)
+        random.shuffle(options_list)
+        self.options = set(options_list)
+        self.exclusion_set = set()
+        
+        # some old scoring stuff
         self.score = 0
         self.solved = False
 
@@ -131,20 +138,19 @@ class WordleSolver:
 
         updated_weights = self.weights * self.options_array
         best_val = 0
-        for option in self.options:
-            # trying to reduce computation time, if we've already guessed, then pass
-            feasibility = sum(sum(self.options_array * option))
-            option_already_guessed = matrix_to_text(option) in self.guesses_text
-            value = sum(sum(option * updated_weights))
-            if option_already_guessed:
-                    continue
-            # otherwise determine if this could even be an answer
-            # if not pass
-            elif feasibility ==  3:
-                    continue
+        available_options = self.options.difference(set(self.guesses_text))
+        available_options = available_options.difference(self.exclusion_set)
+        for option in available_options:
+            # trying to reduce computation time, if we've already guessed
+            # or the answer is infeasible add it to our exclusionary sets
+            feasibility = sum(sum(self.options_array * text_to_matrix(option)))
+            value = sum(sum(text_to_matrix(option) * updated_weights))
+            # all letters have to be possible solutions
+            if feasibility <  5:
+                    self.exclusion_set.add(option)
             # finally determine it's weighted match value for a guess
             elif value > best_val:
-                best_guess = option
+                best_guess = text_to_matrix(option)
                 best_val = value
         return best_guess
     
@@ -234,7 +240,7 @@ def simulate_wordles_n(population, n):
                 'avg_score' : sum(scores)/len(scores)
         }
         results.append(result)
-    results_sorted = sorted(results, key = lambda i: i['avg_score'],reverse=True)
+    results_sorted = sorted(results, key = lambda i: i['avg_score'])
     return results_sorted
 
 def make_next_generation(results, alpha):
