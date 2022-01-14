@@ -266,10 +266,10 @@ def make_next_generation(results, alpha):
         next_generation.append(a)
     return next_generation
     
-def genetic_simulation(pop_size, mutation_alpha, generations):
+def genetic_simulation(pop_size, mutation_alpha, generations, trials):
     pop = initiate_starting_population(pop_size)
     for i in range(generations):
-        results = simulate_wordles_n(pop, 10)
+        results = simulate_wordles_n(pop, trials)
         # create new population from fittest
         new_pop = make_next_generation(results, mutation_alpha)
         pop = new_pop

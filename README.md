@@ -9,15 +9,17 @@ The solving function goes through a few steps:
  - lastly it multiplies the `options_matrix` * `weights` matrix and calulates the value of the matrix. The matrix with the highest value will be it's guess
 
 It will continue this iterative guess and check process until it delivers the correct solution. I find that on average with a randomized weights matrix this
-will solve the puzzle in ~5.5 guesses.
+will solve the puzzle in ~6 guesses.
+
+After testing a bit I'm skeptical that using the probable likelihood of each letter in each position as the initialization matrix is any better than random
+over a large sample size of 1000 trials it converged at 5.96 guesses on average to solve, which is right inline with random.
 
 The next step is to "train" our weights matrix in an unsupervised manner. I do this via a genetic algorithm. I initiate a number of WordleSolver objects
 with random weights and have them solve a varying number of times. The 2 solvers that perform the best are saved and used to populate the next generation.
 This is done by taking a randomized portion of each matrix for each of their "children" and then randomly replacing values according to a "mutation" factor.
-The goal is to use natural selection to derive the best possible starting weights matrix to solve wordle. I have found that the random matrix performs
-better than a weights matrix made up of the probable likelihood of each letter in each position.
+The goal is to use natural selection to derive the best possible starting weights matrix to solve wordle. 
 
-an example
+Some example code
 ```python
 from wordle import WordleSolver
 # initiate an object with a random weights matrix
@@ -43,7 +45,7 @@ Generation 3: Best Solver Score 5.0
 Generation 4: Best Solver Score 4.5
 ```
 
-Some interesting notes -- I found that I ran into bugs when using list comprehension to exclude previous guesses, that combined with really slow computation times, up to 30 seconds per solved made testing any type of genetic algo pretty hard. This led to the set operations to exclude guesses. One result of this is that we enforce that a guessed word must be a possible answer based on the available letters that haven't been eliminated. This means that the algorithm quickly reduces the numbers of items it has to iterate through and runs faster, but also may mean that it has less flexibility to guess. In any case when I did this thesolve times droped to < 3 seconds and typically < 6 guesses rather than 12-15. Before this there were some starting conditions that led to up to 100 guesses on some words.
+Some interesting notes -- I found that I ran into bugs when using list comprehension to exclude previous guesses, that combined with really slow computation times, up to 30 seconds per solve made testing any type of genetic algo pretty hard. This led to the set operations to exclude guesses. One result of this is that we enforce that a guessed word must be a possible answer based on the available letters that haven't been eliminated. This means that the algorithm quickly reduces the numbers of items it has to iterate through and runs faster, but also may mean that it has less flexibility to guess. In any case when I did this the solve times droped to < 3 seconds and typically < 6 guesses rather than 12-15. Before this there were some starting conditions that led to up to 100 guesses on some words.
 
 The other interesting thing I want to investigate is how the weights matrix can change, or possibly be different in different guess stages. In early guesses it may want to optimize to a more random/broad approach to learn as much as possible before guessing, while later on it may want to attempt to choose the best words. I'll have to figure out a way to let that change between guess cycles.
 
