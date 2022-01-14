@@ -37,16 +37,23 @@ You can test the genetic algorithm yourself and play with the results by tuning 
 ```python
 from worldle import *
 # set w to our final solver
-w = genetic_simulation(pop_size=10, mutation_alpha=0.9, generations=5, trials=10)
+w = genetic_simulation(pop_size=25, mutation_alpha=0.9, generations=10, trials=50)
 Generation 0: Best Solver Score 6.0
-Generation 1: Best Solver Score 6.0
-Generation 2: Best Solver Score 5.333333333333333
-Generation 3: Best Solver Score 5.0
-Generation 4: Best Solver Score 4.5
+Generation 1: Best Solver Score 5.724137931034483
+Generation 2: Best Solver Score 5.833333333333333
+Generation 3: Best Solver Score 5.925925925925926
+Generation 4: Best Solver Score 5.8125
+Generation 5: Best Solver Score 5.705882352941177
+Generation 6: Best Solver Score 5.82051282051282
+Generation 7: Best Solver Score 5.857142857142857
+Generation 8: Best Solver Score 5.864864864864865
+Generation 9: Best Solver Score 5.655172413793103
+
+# solver didn't significnatly improve :( 
 ```
 
 Some interesting notes -- I found that I ran into bugs when using list comprehension to exclude previous guesses, that combined with really slow computation times, up to 30 seconds per solve made testing any type of genetic algo pretty hard. This led to the set operations to exclude guesses. One result of this is that we enforce that a guessed word must be a possible answer based on the available letters that haven't been eliminated. This means that the algorithm quickly reduces the numbers of items it has to iterate through and runs faster, but also may mean that it has less flexibility to guess. In any case when I did this the solve times droped to < 3 seconds and typically < 6 guesses rather than 12-15. Before this there were some starting conditions that led to up to 100 guesses on some words.
 
 The other interesting thing I want to investigate is how the weights matrix can change, or possibly be different in different guess stages. In early guesses it may want to optimize to a more random/broad approach to learn as much as possible before guessing, while later on it may want to attempt to choose the best words. I'll have to figure out a way to let that change between guess cycles.
 
-It might also be worth wrapping the genetic algo into a multi-threaded script so that I can get the solvers running in parallel, I'm currently setting a very large popluation/sample size to test overnight since it takes a while to kick off any reasonable sized set and the results haven't converged very much.
+It might also be worth wrapping the genetic algo into a multi-threaded script so that I can get the solvers running in parallel.
